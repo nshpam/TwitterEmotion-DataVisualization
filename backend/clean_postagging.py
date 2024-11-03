@@ -3,6 +3,7 @@ import config
 import nltk
 # nltk.download('averaged_perceptron_tagger_eng') # for first time
 from nltk import pos_tag
+from nltk.corpus import wordnet
 import mongoscript
 
 # connect to mongodb
@@ -17,9 +18,21 @@ def query_label(label, limit):
 
 filter_record = []
 
+def get_wordnet_pos(treebank_tag):
+    if treebank_tag.startswith('J'):
+         return wordnet.ADJ
+    elif treebank_tag.startswith('V'):
+        return wordnet.VERB
+    elif treebank_tag.startswith('N'):
+        return wordnet.NOUN
+    elif treebank_tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN  # Default to noun
+
 def pos_tagging(raw, data, label):
     tagged_data = pos_tag(data)
-    tagged_data = [[token, tag] for token, tag in tagged_data]
+    tagged_data = [[token, get_wordnet_pos(tag)] for token, tag in tagged_data]
 
     filter_record.append({
         'text' : raw,

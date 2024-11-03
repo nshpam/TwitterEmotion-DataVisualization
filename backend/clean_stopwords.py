@@ -76,9 +76,9 @@ for num in range(config.LABEL+1):
         all_list.append(filtered_data)
 
 # print(clean_stop)
-mongoscript.dump_mongodb(clean_stop, mongoscript.connect_collection(config.MONGO_COLLECTION_2))
+# mongoscript.dump_mongodb(clean_stop, mongoscript.connect_collection(config.MONGO_COLLECTION_2))
 
 # print(filter_record)
 
-# df = pd.DataFrame(get_top(config.TOP))
-# print(df)
+df = pd.DataFrame(get_top(config.TOP))
+print(df)
