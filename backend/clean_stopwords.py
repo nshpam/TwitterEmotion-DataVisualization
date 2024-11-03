@@ -2,15 +2,14 @@ from pymongo import MongoClient
 import pandas as pd
 import config
 import nltk
+import mongoscript
 # nltk.download('stopwords')
 # nltk.download('opinion_lexicon')
 from nltk.corpus import stopwords
-from nltk.corpus import opinion_lexicon # sentiment library
+# from nltk.corpus import opinion_lexicon # sentiment library
 
 # connect to mongodb
-client = MongoClient(config.MONGO_CLIENT)
-db = client[config.MONGO_DB]
-col = db[config.MONGO_COLLECTION] 
+col = mongoscript.connect_collection(config.MONGO_COLLECTION_1)
 
 # query data by label
 def query_label(label, limit):
@@ -21,11 +20,13 @@ def query_label(label, limit):
 
 filter_record = {'stopword':{}}
 count_sentence = {}
+clean_stop = []
 
-def filter_data(data):
+def filter_data(raw, data, label):
     new_list = []
     stop_words = set(stopwords.words('english'))
-    positive = set(opinion_lexicon.positive())
+    # positive = set(opinion_lexicon.positive())
+    # negative = set(opinion_lexicon.negative())
 
     for word in data:
 
@@ -39,11 +40,18 @@ def filter_data(data):
                 filter_record['stopword'][word] += 1
             removed = True
         
-        if word in positive:
-            print(word)
+        # if word in positive:
+        #     print(word)
 
         if not removed:
             new_list.append(word)
+
+    clean_stop.append({
+        'text' : raw,
+        'clean' : new_list,
+        'label' : label
+    })
+
         # print(word)
     return new_list
 
@@ -68,12 +76,13 @@ def get_top(top_num, field):
 
 for num in range(config.LABEL+1):
     # print(num , len(query_label(num, False)))
-    documents = query_label(num, True)
+    documents = query_label(num, False)
     raw_list = [doc['text'] for doc in documents]
     all_list = []
 
     for raw in raw_list:
-        filtered_data = filter_data(raw.split(' '))
+        filtered_data = filter_data(raw, raw.split(' '), num)
+
         # if 'because' in raw or 'think' in raw:
         # if 'i ' in raw:
             # because.append(raw)
@@ -82,7 +91,10 @@ for num in range(config.LABEL+1):
     # print(all_list)
     # print(because)
 
-print(filter_record)
+# print(clean_stop)
+mongoscript.dump_mongodb(clean_stop, mongoscript.connect_collection(config.MONGO_COLLECTION_2))
 
-df = pd.DataFrame(get_top(config.TOP, 'stopword'))
-print(df)
+# print(filter_record)
+
+# df = pd.DataFrame(get_top(config.TOP, 'stopword'))
+# print(df)
