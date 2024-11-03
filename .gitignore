@@ -6,3 +6,6 @@ backend/train-00000-of-00001.parquet
 
 # pycache
 __pycache__/
+
+# config
+config.py/
