@@ -16,7 +16,7 @@ col = mongoscript.connect_collection(config.MONGO_COLLECTION_3)
 
 filter_list=['Love','Wake','Way','See','Rice','Case','Job','Chance','Wait','Glad','Saw','Trip','Hope','Pet','Star','Lion','Say'
              ,'Honor','Patience','Web','Dot','Forest','Hall','Town','Fan','Waiter','Pace','Tuesday','Row','Deny','Bird','Wash'
-             ,'Win','Dusty','Shadow','Skip','Fox','Worth']
+             ,'Win','Dusty','Shadow','Skip','Fox','Worth','May','Joy','Faith','Charity','Art','Miles','Tad','Sky','Lay']
 possesive_noun_male=['He','His','Guy']
 possesive_noun_female=['She','Her','Hers']
 
