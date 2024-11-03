@@ -1,10 +1,9 @@
-from pymongo import MongoClient
 import pandas as pd
 import config
 import nltk
 import mongoscript
-# nltk.download('stopwords')
-# nltk.download('opinion_lexicon')
+# nltk.download('stopwords') # for first time
+# nltk.download('opinion_lexicon') # for first time
 from nltk.corpus import stopwords
 # from nltk.corpus import opinion_lexicon # sentiment library
 
@@ -18,7 +17,7 @@ def query_label(label, limit):
     
     return list(col.find({'label': label}, {'_id': 0, 'label':0}))
 
-filter_record = {'stopword':{}}
+filter_record = {}
 count_sentence = {}
 clean_stop = []
 
@@ -30,20 +29,13 @@ def filter_data(raw, data, label):
 
     for word in data:
 
-        removed = False
-
         # remove stop words
         if word in stop_words: 
-            if word not in filter_record['stopword']:
-                filter_record['stopword'][word] = 1
+            if word not in filter_record:
+                filter_record[word] = 1
             else:
-                filter_record['stopword'][word] += 1
-            removed = True
-        
-        # if word in positive:
-        #     print(word)
-
-        if not removed:
+                filter_record[word] += 1
+        else:
             new_list.append(word)
 
     clean_stop.append({
@@ -55,10 +47,10 @@ def filter_data(raw, data, label):
         # print(word)
     return new_list
 
-def get_top(top_num, field):
+def get_top(top_num):
 
     sort_record = {}
-    sorted_filter_record= dict(sorted(filter_record[field].items(), key=lambda item: item[1], reverse=True))
+    sorted_filter_record= dict(sorted(filter_record.items(), key=lambda item: item[1], reverse=True))
 
     for record in sorted_filter_record.items():
         count = list(record)[1]
@@ -72,29 +64,21 @@ def get_top(top_num, field):
     count_keys = sorted(sort_record.items(), reverse=True)[:top_num]
 
     return count_keys
-    # return sorted_word_counts
+
 
 for num in range(config.LABEL+1):
+    all_list = []
     # print(num , len(query_label(num, False)))
     documents = query_label(num, False)
     raw_list = [doc['text'] for doc in documents]
-    all_list = []
-
     for raw in raw_list:
         filtered_data = filter_data(raw, raw.split(' '), num)
-
-        # if 'because' in raw or 'think' in raw:
-        # if 'i ' in raw:
-            # because.append(raw)
         all_list.append(filtered_data)
-    
-    # print(all_list)
-    # print(because)
 
 # print(clean_stop)
 mongoscript.dump_mongodb(clean_stop, mongoscript.connect_collection(config.MONGO_COLLECTION_2))
 
 # print(filter_record)
 
-# df = pd.DataFrame(get_top(config.TOP, 'stopword'))
+# df = pd.DataFrame(get_top(config.TOP))
 # print(df)
